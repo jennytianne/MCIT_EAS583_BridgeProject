@@ -1,6 +1,7 @@
 from web3 import Web3
 from eth_account.messages import encode_defunct
 import eth_account
+from eth_account import Account
 import os
 
 def sign_message(challenge, filename="secret_key.txt"):
@@ -15,16 +16,19 @@ def sign_message(challenge, filename="secret_key.txt"):
     with open(filename, "r") as f:
         key = f.readlines()
     assert(len(key) > 0), "Your account secret_key.txt is empty"
+    private_key = key[0].strip()  # Take the first line and remove whitespace/newlines
 
     w3 = Web3()
+
+    # Encode the message
     message = encode_defunct(challenge)
 
-    # TODO recover your account information for your private key and sign the given challenge
+    # Derive the Ethereum address from the private key
+    account = Account.from_key(private_key)
+    eth_addr = account.address
+
     # Use the code from the signatures assignment to sign the given challenge
-    
-
-
-
+    signed_message = w3.eth.account.sign_message(message, private_key=private_key)
 
 
     assert eth_account.Account.recover_message(message,signature=signed_message.signature.hex()) == eth_addr, f"Failed to sign message properly"
