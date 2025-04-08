@@ -22,35 +22,32 @@ contract Destination is AccessControl {
         _grantRole(WARDEN_ROLE, admin);
     }
 
-	function wrap(address _underlying_token, address _recipient, uint256 _amount ) public onlyRole(WARDEN_ROLE) {
+function wrap(address _underlying_token, address _recipient, uint256 _amount ) public onlyRole(WARDEN_ROLE) {
 		//YOUR CODE HERE
     address bridgeTokenAddress=underlying_tokens[_underlying_token];
-    require(bridgeTokenAddress!=address(0),"Token not registered");
+    require(bridgeTokenAddress!=address(0),"Token is not registered");
 
     BridgeToken token=BridgeToken(bridgeTokenAddress);
     token.mint(_recipient,_amount);
 
     emit Wrap(_underlying_token,bridgeTokenAddress,_recipient,_amount);
-	}
+}
 
-	function unwrap(address _wrapped_token, address _recipient, uint256 _amount ) public {
+function unwrap(address _wrapped_token, address _recipient, uint256 _amount ) public {
 		//YOUR CODE HERE
     BridgeToken token=BridgeToken(_wrapped_token);
     token.burnFrom(msg.sender,_amount);
-
     address underlying=underlying_tokens[_wrapped_token];
     emit Unwrap(underlying,_wrapped_token,msg.sender,_recipient,_amount);
+}
 
 
-	}
-
-	function createToken(address _underlying_token, string memory name, string memory symbol ) public onlyRole(CREATOR_ROLE) returns(address) {
+function createToken(address _underlying_token, string memory name, string memory symbol ) public onlyRole(CREATOR_ROLE) returns(address) {
 		//YOUR CODE HERE
-    require(underlying_tokens[_underlying_token]==address(0),"Token already registered");
+    require(underlying_tokens[_underlying_token]==address(0),"Token is already registered");
 
     BridgeToken bridgeToken = new BridgeToken(_underlying_token, name,symbol,address(this));
     address tokenAddress=address(bridgeToken);
-
     underlying_tokens[_underlying_token]=tokenAddress;
     wrapped_tokens[_underlying_token]=tokenAddress;
     underlying_tokens[tokenAddress]=_underlying_token;
@@ -58,7 +55,7 @@ contract Destination is AccessControl {
     emit Creation(_underlying_token,tokenAddress);
     return tokenAddress;
 
-	}
+}
 
 }
 
