@@ -52,36 +52,45 @@ def scan_blocks(chain,start_block,end_block,contract_address, eventfile='deposit
     else:
         print( f"Scanning blocks {start_block} - {end_block} on {chain}" )
 
-    with open("deposit_logs.csv", "w", newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(["chain", "token", "recipient", "amount", "transactionHash", "address"])
+    event_data = []
 
-        if end_block - start_block < 30:
-            event_filter = contract.events.Deposit.create_filter(fromBlock=start_block,toBlock=end_block,argument_filters=arg_filter)
+    if end_block - start_block < 30:
+        event_filter = contract.events.Deposit.create_filter(from_block=start_block, to_block=end_block,
+                                                             argument_filters=arg_filter)
+        events = event_filter.get_all_entries()
+        # print( f"Got {len(events)} entries for block {block_num}" )
+        # TODO YOUR CODE HERE
+        for evt in events:
+            event_data.append({
+                'chain': chain,
+                'token': evt.args['token'],
+                'recipient': evt.args['recipient'],
+                'amount': evt.args['amount'],
+                'transactionHash': evt.transactionHash.hex(),
+                'address': evt.address
+            })
+    else:
+        for block_num in range(start_block, end_block + 1):
+            event_filter = contract.events.Deposit.create_filter(from_block=block_num, to_block=block_num,
+                                                                 argument_filters=arg_filter)
             events = event_filter.get_all_entries()
-            #print( f"Got {len(events)} entries for block {block_num}" )
+            # print( f"Got {len(events)} entries for block {block_num}" )
+            # TODO YOUR CODE HERE
             for evt in events:
-                writer.writerow([
-                    chain,
-                    evt.args['token'],
-                    evt.args['recipient'],
-                    evt.args['amount'],
-                    evt.transactionHash.hex(),
-                    evt.address
-                ])
+                event_data.append({
+                    'chain': chain,
+                    'token': evt.args['token'],
+                    'recipient': evt.args['recipient'],
+                    'amount': evt.args['amount'],
+                    'transactionHash': evt.transactionHash.hex(),
+                    'address': evt.address
+                })
 
-        else:
-            for block_num in range(start_block,end_block+1):
-                event_filter = contract.events.Deposit.create_filter(fromBlock=block_num,toBlock=block_num,argument_filters=arg_filter)
-                events = event_filter.get_all_entries()
-                #print( f"Got {len(events)} entries for block {block_num}" )
-                for evt in events:
-                    writer.writerow([
-                        chain,
-                        evt.args['token'],
-                        evt.args['recipient'],
-                        evt.args['amount'],
-                        evt.transactionHash.hex(),
-                        evt.address
-                    ])
+    df = pd.DataFrame(event_data)
+    df['date'] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+
+    if not Path(eventfile).exists():
+        df.to_csv(eventfile, index=False, header=True)
+    else:
+        df.to_csv(eventfile, mode='a', header=False, index=False)
 
