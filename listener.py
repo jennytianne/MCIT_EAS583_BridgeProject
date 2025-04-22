@@ -9,7 +9,7 @@ import pandas as pd
 import csv
 
 
-def scan_blocks(chain,start_block,end_block,contract_address, eventfile='deposit_logs.csv'):
+def scanBlocks(chain,start_block,end_block,contract_address, eventfile='deposit_logs.csv'):
     """
     chain - string (Either 'bsc' or 'avax')
     start_block - integer first block to scan
