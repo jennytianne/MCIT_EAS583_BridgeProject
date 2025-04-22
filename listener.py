@@ -52,7 +52,7 @@ def scan_blocks(chain,start_block,end_block,contract_address, eventfile='deposit
     else:
         print( f"Scanning blocks {start_block} - {end_block} on {chain}" )
 
-    event_data = []
+    output_data = []
 
     if end_block - start_block < 30:
         event_filter = contract.events.Deposit.create_filter(from_block=start_block, to_block=end_block,
@@ -61,7 +61,7 @@ def scan_blocks(chain,start_block,end_block,contract_address, eventfile='deposit
         # print( f"Got {len(events)} entries for block {block_num}" )
         # TODO YOUR CODE HERE
         for evt in events:
-            event_data.append({
+            output_data.append({
                 'chain': chain,
                 'token': evt.args['token'],
                 'recipient': evt.args['recipient'],
@@ -77,7 +77,7 @@ def scan_blocks(chain,start_block,end_block,contract_address, eventfile='deposit
             # print( f"Got {len(events)} entries for block {block_num}" )
             # TODO YOUR CODE HERE
             for evt in events:
-                event_data.append({
+                output_data.append({
                     'chain': chain,
                     'token': evt.args['token'],
                     'recipient': evt.args['recipient'],
@@ -86,11 +86,11 @@ def scan_blocks(chain,start_block,end_block,contract_address, eventfile='deposit
                     'address': evt.address
                 })
 
-    df = pd.DataFrame(event_data)
-    df['date'] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+    output_df = pd.DataFrame(output_data)
+    #df['date'] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
     if not Path(eventfile).exists():
-        df.to_csv(eventfile, index=False, header=True)
+        output_df.to_csv(eventfile, index=False, header=True)
     else:
-        df.to_csv(eventfile, mode='a', header=False, index=False)
+        output_df.to_csv(eventfile, mode='a', header=False, index=False)
 
