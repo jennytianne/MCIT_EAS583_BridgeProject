@@ -86,9 +86,8 @@ def scan_blocks(chain,start_block,end_block,contract_address, eventfile='deposit
                     'address': evt.address
                 })
 
+    # write out the dataframe as 'deposit_logs.csv'
     output_df = pd.DataFrame(output_data)
-    #df['date'] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-
     if not Path(eventfile).exists():
         output_df.to_csv(eventfile, index=False, header=True)
     else:
